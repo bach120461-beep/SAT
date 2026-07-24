@@ -9,6 +9,7 @@
 #include "Rendering/Renderer.h"
 #include "Rendering/Camera.h"
 #include "Physic.h"
+#include "Shape.h"
 #include <vector>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -57,26 +58,29 @@ int main()
 
     Camera camera(SCR_WIDTH, SCR_HEIGHT);
     auto squareMesh = std::make_shared<Mesh>(vertices, indices);
+    auto carMesh = MeshFactory::createCar(80.0f, 50.0f, 10.0f);
     Shader basicShader("Resources/Shader.vert", "Resources/Shader.frag");
     Renderer renderer(basicShader, camera);
-    SceneObject square1(squareMesh, glm::vec3(-300.0f, 0.0f, 0.0f), glm::vec3(100.0f, 0.0f, 0.0f), 1.0f, glm::vec4(0.0f, 0.0f, 0.0f,1.0f));
-    SceneObject square2(squareMesh, glm::vec3(300.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec4(0.2f, 0.3f, 0.1f, 1.0f));
+    SceneObject square1(carMesh, glm::vec3(-300.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec4(0.0f, 0.0f, 0.0f,1.0f));
+    SceneObject square2(carMesh, glm::vec3(300.0f, 0.0f, 0.0f), glm::vec3(-100.0f, 0.0f, 0.0f), 1.0f, glm::vec4(0.2f, 0.3f, 0.1f, 1.0f));
 
     camera.zoom(2);
-
+    std::cout << square1.calculateBoundingRadius() << '\n';
+    std::cout << square2.calculateBoundingRadius() << '\n';
     std::cout
         << "Before collision\n"
         << "A vel = " << square1.physics.velocity.x
         << "\nB vel = " << square2.physics.velocity.x
         << '\n';
-    float lastFrame = 0.0f;
+    float lastFrame = glfwGetTime();
     square1.restitution = 0.5f;
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
 
-        float currentFrame = glfwGetTime();
-        float dt = currentFrame - lastFrame;
+        double currentFrame = glfwGetTime();
+        float dt = static_cast<float>(currentFrame - lastFrame);
+        if (dt > 0.016f) dt = 0.016f;
         lastFrame = currentFrame;
 
         //square.applyForce(glm::vec3(50.0f,0.0f,0.0f));
@@ -85,6 +89,10 @@ int main()
         square2.physics.update(dt);
         info = Collision::checkAABB(square1, square2);
         Collision::resolveCollision(square1, square2, info);
+            std::cout
+                << "Normal = "
+                << info.normal.x << ", "
+                << info.normal.y << '\n';
         if (info.hit) {
             std::cout
                 << "After collision\n"
@@ -104,6 +112,7 @@ int main()
         
         glfwSwapBuffers(window);
         glfwPollEvents();
+        std::cout << "dt = " << dt << '\n';
     }
 }
 

@@ -1,5 +1,7 @@
 #include "Physic.h"
 #include <iostream>
+#include <algorithm>
+
 
 //Physicbody
 Physicbody::Physicbody(glm::vec3 p_postion, glm::vec3 p_velocity, float p_mass)
@@ -131,16 +133,17 @@ CollisionInfo Collision::checkCircle(const SceneObject& obj_one, const SceneObje
 	glm::vec3 posOne = glm::vec3(obj_one.physics.position);
 	glm::vec3 posTwo = glm::vec3(obj_two.physics.position);
 
-	float dist = glm::length(posOne - posTwo);
+	float dist = glm::length(posTwo - posOne);
 	float radiSum = obj_one.calculateBoundingRadius() + obj_two.calculateBoundingRadius();
 	
 	//No collision
+
 	if (dist >= radiSum)
 		return info;
 
 	info.hit = true;
 	info.overlap = radiSum - dist;
-	info.normal = glm::normalize(posOne - posTwo);
+	info.normal = glm::normalize(posTwo - posOne);
 
 	return info;
 }
@@ -156,11 +159,14 @@ void Collision::resolveCollision(SceneObject& obj_one, SceneObject& obj_two, con
 
 void Collision::resolvePosition(SceneObject& a, SceneObject& b, const CollisionInfo& info)
 {
-	float push = info.overlap / 2.0f;
-	a.physics.position -= info.normal * push;
-	b.physics.position += info.normal * push;
-	std::cout << "A: " << a.physics.position.x
-		<< " B: " << b.physics.position.x << '\n';
+	float percent = 0.8f;
+	float slop = 0.01f;
+
+	float correction =
+		std::max(info.overlap - slop, 0.0f) * percent;
+	//float push = info.overlap / 2.0f;
+	a.physics.position -= info.normal * correction * 0.5f;
+	b.physics.position += info.normal * correction * 0.5f;
 }
 
 void Collision::resolveVelocity(SceneObject& a, SceneObject& b, const CollisionInfo& info)
@@ -174,7 +180,7 @@ void Collision::resolveVelocity(SceneObject& a, SceneObject& b, const CollisionI
 
 	std::cout << "velAlongNormal = " << velAlongNormal << '\n';
 
-	if (velAlongNormal > 0.0f)
+	if (velAlongNormal > -0.001f)
 		return;
 
 	float e = std::min(a.restitution, b.restitution);
