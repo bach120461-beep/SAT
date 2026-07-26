@@ -103,24 +103,29 @@ std::shared_ptr<Mesh> MeshFactory::createCar(float carW, float carH, float wheel
 	std::vector<float> vertices;
 	std::vector<unsigned int> indices;
 
-	// === Body (rectangle) ===
-	float hw = carW / 2.0f;
-	float hh = carH / 2.0f;
+	float hw = carW * 0.5f;
+	float hh = carH * 0.5f;
 
 	vertices.insert(vertices.end(), {
-		-hw, -hh, 0.0f,  // 0 bottom left
-		 hw, -hh, 0.0f,  // 1 bottom right
-		 hw,  hh * 0.4f, 0.0f, //  2 middle right
-		-hw,  hh *0.4f , 0.0f, //  3 middle left 
-		 hw - hw* 0.2f,  hh, 0.0f,  // 4 top right
-		-hw + hw* 0.2f,  hh, 0.0f   // 5 top left
+		// Body
+		-hw,          -hh,          0.0f, //0
+		 hw,          -hh,          0.0f, //1
+
+		 hw,          -hh * 0.1f,    0.0f, //2 front bumper
+		 hw * 0.65f,     hh * 0.1f,    0.0f, //3 hood
+		 hw * 0.25f,      hh * 0.7f,         0.0f, //4 roof front
+		-hw * 0.25f,      hh *0.7f,         0.0f, //5 roof rear
+		-hw * 0.65f,      hh * 0.1f,   0.0f, //6 trunk
+		-hw,           -hh * 0.1f,   0.0f  //7 rear bumper
 		});
 
 	indices.insert(indices.end(), {
-		0, 1, 2,
-		0, 2, 3,
-		3, 5, 4,
-		5, 4, 2
+		0,1,2,
+		0,2,7,
+		7,2,6,
+		2,3,6,
+		6,3,5,
+		3,4,5
 	});
 
 	// === Front wheel (circle) ===
