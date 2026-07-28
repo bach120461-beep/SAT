@@ -177,3 +177,30 @@ std::shared_ptr<Mesh> MeshFactory::createCar(float carW, float carH, float wheel
 
 	return std::make_shared<Mesh>(vertices, indices);
 }
+
+//Track - background scene blueprints
+std::shared_ptr<Mesh> MeshFactory::createGround(float width, float thickness)
+{
+	float hw = width * 0.5f;
+	float ht = thickness * 0.5f;
+
+	std::vector<float> vertices = {
+		-hw, -ht, 0.0f,
+		 hw, -ht, 0.0f,
+		 hw,  ht, 0.0f,
+		-hw,  ht, 0.0f
+	};
+	std::vector<unsigned int> indices = { 0,1,2, 0,2,3 };
+	return std::make_shared<Mesh>(vertices, indices);
+}
+/*
+std::shared_ptr<Mesh> MeshFactory::createWall(float height, float thickness)
+{
+
+}
+
+std::shared_ptr<Mesh> MeshFactory::createCircularTrack(float radius, float thickness, int segments)
+{
+
+}
+*/

@@ -1,16 +1,4 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <iostream>
-#include "Rendering/Mesh.h"
-#include "Rendering/Shader.h"
-#include "Rendering/Renderer.h"
-#include "Rendering/Camera.h"
-#include "Physic.h"
-#include "Shape.h"
-#include <vector>
+#include "included.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -58,20 +46,14 @@ int main()
 
     Camera camera(SCR_WIDTH, SCR_HEIGHT);
     auto squareMesh = std::make_shared<Mesh>(vertices, indices);
+    auto groundMesh = MeshFactory::createGround(800.0f, 2.0f);
     auto carMesh = MeshFactory::createCar(80.0f, 50.0f, 10.0f);
     Shader basicShader("Resources/Shader.vert", "Resources/Shader.frag");
     Renderer renderer(basicShader, camera);
-    SceneObject square1(carMesh, glm::vec3(-300.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::vec4(0.0f, 0.0f, 0.0f,1.0f));
-    SceneObject square2(carMesh, glm::vec3(300.0f, 0.0f, 0.0f), glm::vec3(-100.0f, 0.0f, 0.0f), 1.0f, glm::vec4(0.2f, 0.3f, 0.1f, 1.0f));
-
+    SceneObject square1(carMesh, glm::vec3(-300.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, Color::Black);
+    SceneObject square2(carMesh, glm::vec3(300.0f, 0.0f, 0.0f), glm::vec3(-100.0f, 0.0f, 0.0f), 1.0f, Color::Blue);
+    SceneObject ground(groundMesh, glm::vec3(0.0f, -35.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, Color::Black);
     camera.zoom(2);
-    std::cout << square1.calculateBoundingRadius() << '\n';
-    std::cout << square2.calculateBoundingRadius() << '\n';
-    std::cout
-        << "Before collision\n"
-        << "A vel = " << square1.physics.velocity.x
-        << "\nB vel = " << square2.physics.velocity.x
-        << '\n';
     float lastFrame = glfwGetTime();
     square1.restitution = 0.5f;
     while (!glfwWindowShouldClose(window))
@@ -109,6 +91,7 @@ int main()
         
         renderer.drawMesh(*square1.mesh, square1.getModelMat(),square1.color);
         renderer.drawMesh(*square2.mesh, square2.getModelMat(), square2.color);
+        renderer.drawMesh(*ground.mesh, ground.getModelMat(), ground.color);
         
         glfwSwapBuffers(window);
         glfwPollEvents();
