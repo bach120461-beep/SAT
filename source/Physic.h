@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+
 class Physicbody
 {
 public:
@@ -49,6 +50,26 @@ public:
 	float restitution = 1.0f;
 };
 
+//Boundary class - handle background scene of simulation
+//These define are not in shape.h because if it is both file have to included each other, which lead to a lot of problem
+enum class BoundaryType //Type of track via integer
+{
+	FLAT,
+	CIRCULAR,
+	SLOPE
+};
+
+struct BoundarySegment
+{
+	SceneObject object;
+	BoundaryType type;
+	float friction;
+
+	//For circular track only
+	float trackRad;
+	glm::vec3 trackCenter;
+};
+
 class Collision
 {
 public:
@@ -56,9 +77,11 @@ public:
 	static CollisionInfo checkAABB(const SceneObject& obj_one, const SceneObject& obj_two);
 	static CollisionInfo checkCircle(const SceneObject& obj_one, const SceneObject& obj_two);
 	static void resolveCollision(SceneObject& obj_one, SceneObject& obj_two, const CollisionInfo& info);
+	static CollisionInfo checkAABB_Boundary(const SceneObject& obj, const BoundarySegment& boundary);
+	static CollisionInfo checkCircularBoundary(const SceneObject& obj, const BoundarySegment& boundary);
+	static void resolveBoundaryCollision(SceneObject& obj, const BoundarySegment& boundary, const CollisionInfo& info);
 private:
 	static void resolvePosition(SceneObject& a, SceneObject& b, const CollisionInfo& info);
 	static void resolveVelocity(SceneObject& a, SceneObject& b, const CollisionInfo& info);
-
 };
 

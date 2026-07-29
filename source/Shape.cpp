@@ -1,4 +1,5 @@
 #include "Shape.h"
+#include "Physic.h"
 #include <glm/gtc/constants.hpp>
 
 std::shared_ptr<Mesh> MeshFactory::createCircle(float radius, int segments)
@@ -250,4 +251,96 @@ std::shared_ptr<Mesh> MeshFactory::createCircularTrack(float radius, float thick
 	    });
 	}
 	return std::make_shared<Mesh>(vertices, indices);
+}
+
+//Drawing boundary
+Boundary& Boundary::addGround(float width, float thickness, glm::vec3 position, float friction)
+{
+	auto mesh = MeshFactory::createGround(width, thickness);
+
+	BoundarySegment seg{
+		SceneObject(mesh, position, glm::vec3(0.0f),
+					std::numeric_limits<float>::infinity(),
+					Color::Black),
+		BoundaryType::FLAT,
+		friction,
+		0.0f,
+		glm::vec3(0.0f)
+	};
+	segments.push_back(seg);
+	return *this;
+}
+Boundary& Boundary::addWall(float height, float thickness, glm::vec3 position, float friction)
+{
+	auto mesh = MeshFactory::createWall(height, thickness);
+
+	BoundarySegment seg{
+		SceneObject(mesh, position, glm::vec3(0.0f),
+					std::numeric_limits<float>::infinity(),
+					Color::Black),
+		BoundaryType::FLAT,
+		friction,
+		0.0f,
+		glm::vec3(0.0f)
+	};
+	segments.push_back(seg);
+	return *this;
+}
+Boundary& Boundary::addSlope(float width, float thickness, glm::vec3 position, float angle, float friction)
+{
+	auto mesh = MeshFactory::createGround(width, thickness);
+	// Rotation baked into SceneObject
+	SceneObject obj(mesh, position, glm::vec3(0.0f), std::numeric_limits<float>::infinity(), Color::Black);
+	obj.physics.rotation = angle;  
+
+	BoundarySegment seg{ obj, BoundaryType::SLOPE, friction, 0.0f, glm::vec3(0.0f) };
+	segments.push_back(seg);
+	return *this;
+}
+Boundary& Boundary::addCircularTrack(float radius, float thickness, glm::vec3 center, float friction, int segs)
+{
+	auto mesh = MeshFactory::createCircularTrack(radius, thickness, segs);
+
+	BoundarySegment seg{
+		SceneObject(mesh, center, glm::vec3(0.0f), std::numeric_limits<float>::infinity(),Color::Black),
+		BoundaryType::CIRCULAR, friction, radius, center
+	};
+	segments.push_back(seg);
+	return *this;
+}
+Boundary& Boundary::addLine(glm::vec3 startPoint, glm::vec3 endPoint, float thickness, float friction)
+{
+	// Calculate position, length, angle from start/end points
+	glm::vec3 dir = endPoint - startPoint;
+	float     length = glm::length(dir);
+	float     angle = atan2(dir.y, dir.x);
+	glm::vec3 center = (startPoint + endPoint) / 2.0f;
+
+	auto mesh = MeshFactory::createGround(length, thickness);
+
+	SceneObject obj(mesh, center, glm::vec3(0.0f),std::numeric_limits<float>::infinity(), Color::Black);
+	obj.physics.rotation = angle;
+
+	BoundarySegment seg{ obj, BoundaryType::FLAT, friction, 0.0f, glm::vec3(0.0f) };
+	segments.push_back(seg);
+	return *this;
+}
+void Boundary::draw(Renderer& renderer)
+{
+	for (auto& seg : segments) {
+		renderer.drawMesh(*seg.object.mesh, seg.object.getModelMat(), seg.object.color);
+	}
+}
+void Boundary::checkAndResolve(SceneObject& obj)
+{
+	for (auto& seg : segments) {
+		CollisionInfo info;
+
+		if (seg.type == BoundaryType::FLAT)
+			info = Collision::checkAABB_Boundary(obj, seg);
+		else
+			info = Collision::checkCircularBoundary(obj, seg);
+
+		Collision::resolveBoundaryCollision(obj, seg, info);
+	}
 }
