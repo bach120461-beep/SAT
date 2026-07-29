@@ -14,8 +14,8 @@ public:
 	static std::shared_ptr<Mesh> createLine(glm::vec3 startPoint, glm::vec3 endPoint);
 	static std::shared_ptr<Mesh> createCar(float carW, float carH, float wheelR, int wheelSegs = 32);
 	static std::shared_ptr<Mesh> createGround(float width, float thickness);
-	//static std::shared_ptr<Mesh> createWall(float height, float thickness);
-	//static std::shared_ptr<Mesh> createCircularTrack(float radius, float thickness, int segments = 64);
+	static std::shared_ptr<Mesh> createWall(float height, float thickness);
+	static std::shared_ptr<Mesh> createCircularTrack(float radius, float thickness, int segments = 64);
 };
 
 //Handful way to adjust color of object

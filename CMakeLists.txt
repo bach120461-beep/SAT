@@ -58,7 +58,7 @@ add_executable(${PROJECT_NAME}
     "Rendering/Camera.cpp"      
     "Rendering/Renderer.h"
     "Rendering/Renderer.cpp"    
-  "source/Physic.h" "source/Physic.cpp" "source/Shape.h" "source/Shape.cpp")
+  "source/Physic.h" "source/Physic.cpp" "source/Shape.h" "source/Shape.cpp" "source/Application.h" "source/Application.cpp")
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}

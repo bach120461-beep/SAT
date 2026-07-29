@@ -108,15 +108,15 @@ std::shared_ptr<Mesh> MeshFactory::createCar(float carW, float carH, float wheel
 
 	vertices.insert(vertices.end(), {
 		// Body
-		-hw,          -hh,          0.0f, //0
-		 hw,          -hh,          0.0f, //1
+		-hw, -hh, 0.0f, //0
+		 hw, -hh, 0.0f, //1
 
-		 hw,          -hh * 0.1f,    0.0f, //2 front bumper
-		 hw * 0.65f,     hh * 0.1f,    0.0f, //3 hood
-		 hw * 0.25f,      hh * 0.7f,         0.0f, //4 roof front
-		-hw * 0.25f,      hh *0.7f,         0.0f, //5 roof rear
-		-hw * 0.65f,      hh * 0.1f,   0.0f, //6 trunk
-		-hw,           -hh * 0.1f,   0.0f  //7 rear bumper
+		 hw, -hh * 0.1f, 0.0f, //2 front bumper
+		 hw * 0.65f, hh * 0.1f,0.0f, //3 hood
+		 hw * 0.25f, hh * 0.7f, 0.0f, //4 roof front
+		-hw * 0.25f, hh *0.7f, 0.0f, //5 roof rear
+		-hw * 0.65f, hh * 0.1f, 0.0f, //6 trunk
+		-hw, -hh * 0.1f, 0.0f  //7 rear bumper
 		});
 
 	indices.insert(indices.end(), {
@@ -193,14 +193,61 @@ std::shared_ptr<Mesh> MeshFactory::createGround(float width, float thickness)
 	std::vector<unsigned int> indices = { 0,1,2, 0,2,3 };
 	return std::make_shared<Mesh>(vertices, indices);
 }
-/*
+
 std::shared_ptr<Mesh> MeshFactory::createWall(float height, float thickness)
 {
+	float hh = height * 0.5f;
+	float ht = thickness * 0.5f;
 
+	std::vector<float> vertices = {
+		-ht, -hh, 0.0f,
+		ht, -hh, 0.0f,
+		ht, hh, 0.0f,
+		-ht, hh, 0.0f
+	};
+	std::vector <unsigned int> indices = { 0,1,2 , 0,2,3 };
+	return std::make_shared<Mesh>(vertices, indices);
 }
 
 std::shared_ptr<Mesh> MeshFactory::createCircularTrack(float radius, float thickness, int segments)
 {
+	std::vector<float> vertices;
+	std::vector<unsigned int> indices;
 
+	float innerRad = radius - thickness * 0.5f;
+	float outerRad = radius + thickness * 0.5f;
+
+	//Inner and outer vertices
+	for (int i = 0; i <= segments; i++)
+	{
+		//These are just math
+		float angle = (float)i / segments * glm::two_pi<float>();
+		float cos_a = cos(angle);
+		float sin_a = sin(angle);
+
+		//Outer vertex
+		vertices.push_back(outerRad * cos_a);
+		vertices.push_back(outerRad * sin_a);
+		vertices.push_back(0.0f);
+
+		//Inner vertex
+		vertices.push_back(innerRad * cos_a);
+		vertices.push_back(innerRad * sin_a);
+		vertices.push_back(0.0f);
+	}
+
+	//Circle segment order
+	for (int i = 0; i < segments; i++)
+	{
+		unsigned int outer1 = i * 2;
+		unsigned int inner1 = i * 2 + 1;
+		unsigned int outer2 = (i + 1) * 2;
+		unsigned int inner2 = (i + 1) * 2 + 1;
+
+		indices.insert(indices.end(), {
+			outer1, inner1, outer2,   // triangle 1
+			inner1, inner2, outer2    // triangle 2
+	    });
+	}
+	return std::make_shared<Mesh>(vertices, indices);
 }
-*/
