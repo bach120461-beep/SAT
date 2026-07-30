@@ -52,3 +52,8 @@ void Mesh::Render()
 {
 	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 }
+
+void Mesh::RenderOutline()
+{
+	glDrawElements(GL_LINES, indexCount, GL_UNSIGNED_INT, 0);
+}

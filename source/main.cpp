@@ -14,7 +14,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Motion Simulation", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -32,7 +32,6 @@ int main()
     Camera camera(SCR_WIDTH, SCR_HEIGHT);
     auto groundMesh = MeshFactory::createGround(800.0f, 2.0f);
     auto carMesh = MeshFactory::createCar(80.0f, 50.0f, 10.0f);
-    auto wallMesh = MeshFactory::createWall(300.0f, 2.0f);
     Shader basicShader("Resources/Shader.vert", "Resources/Shader.frag");
     Renderer renderer(basicShader, camera);
     SceneObject square1(carMesh, glm::vec3(-400.0f, 70.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, Color::Black);
@@ -40,11 +39,9 @@ int main()
     // Circular motion track
     Boundary linearTrack;
     linearTrack
-        .addGround(400.0f, 5.0f, glm::vec3(-400.0f, 35.0f, 0.0f))
-        .addWall(100.0f, 5.0f, glm::vec3(-600.0f, 35.0f, 0.0f))
-        .addSlope(420.0f, 5.0f, glm::vec3(0.0f, 0.0f, 0.0f),glm::radians(-10.0f))
-        .addGround(400.0f, 5.0f, glm::vec3(400.0f, -35.0f, 0.0f))
-        .addWall(100.0f, 5.0f, glm::vec3(600.0f, -17.5f, 0.0f));
+        .addGround(500.0f, 5.0f, glm::vec3(-250.0f, -200.0f, 0.0f))
+        .addArc(20.0f, 5.0f, glm::vec3(0.0f, -170.0f, 0.0f), glm::radians(270.0f),glm::radians(360.0f))               
+        .addCircularTrack(200.0f, glm::vec3(400.0f, -200.0f, 0.0f), 5.0f);
     float lastFrame = glfwGetTime();
     square1.restitution = 0.5f;
     while (!glfwWindowShouldClose(window))
@@ -62,8 +59,8 @@ int main()
         square1.physics.update(dt);
         square2.physics.update(dt);
         linearTrack.draw(renderer);
-        renderer.drawMesh(*square1.mesh, square1.getModelMat(), square1.color);
-        renderer.drawMesh(*square2.mesh, square2.getModelMat(), square2.color);
+        //renderer.drawMesh(*square1.mesh, square1.getModelMat(), square1.color);
+        //renderer.drawMesh(*square2.mesh, square2.getModelMat(), square2.color);
         info = Collision::checkAABB(square1, square2);
         Collision::resolveCollision(square1, square2, info);
         glfwSwapBuffers(window);

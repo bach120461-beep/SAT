@@ -14,5 +14,6 @@ public:
 	void Bind();
 	void UnBind();
 	void Render();
+	void RenderOutline();
 	~Mesh();
 };

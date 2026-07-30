@@ -26,6 +26,21 @@ void Renderer::drawMesh(Mesh& mesh, const glm::mat4 model, const glm::vec4& colo
     mesh.Render();
 }
 
+void Renderer::drawMeshOutline(Mesh& mesh, const glm::mat4 model, const glm::vec4& color)
+{
+    shader.Use();
+    // Camera matrices (cached — only resent if camera moved)
+    shader.setUniformMatrix4("view", camera.getViewMat());
+    shader.setUniformMatrix4("projection", camera.OrthoProjectionMat());
+
+    // Per-object uniforms
+    shader.setUniformMatrix4("model", model);
+    shader.setUniform("color", color);
+
+    mesh.Bind();
+    mesh.RenderOutline();
+}
+
 void Renderer::drawLine(glm::vec2 start, glm::vec2 end, const glm::vec4& color)
 {
     std::vector<float> verts = {

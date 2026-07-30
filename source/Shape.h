@@ -24,14 +24,16 @@ class MeshFactory
 {
 public:
 	static std::shared_ptr<Mesh> createCircle(float radius, int segments = 64);
-	static std::shared_ptr<Mesh> createCircleOutline(float radius, int segments = 64);
+	static std::shared_ptr<Mesh> createCircleOutline(float radius, float thickness, int segments = 64);
 	static std::shared_ptr<Mesh> createRectangle(float width, float height);
 	static std::shared_ptr<Mesh> createArrow(float length);
 	static std::shared_ptr<Mesh> createLine(glm::vec3 startPoint, glm::vec3 endPoint);
 	static std::shared_ptr<Mesh> createCar(float carW, float carH, float wheelR, int wheelSegs = 32);
 	static std::shared_ptr<Mesh> createGround(float width, float thickness);
 	static std::shared_ptr<Mesh> createWall(float height, float thickness);
-	static std::shared_ptr<Mesh> createCircularTrack(float radius, float thickness, int segments = 64);
+	static std::shared_ptr <Mesh> createHalfCircle(float radius, int segments = 64);
+	static std::shared_ptr <Mesh> createHalfCircleOutLine(float radius, float thickness, int segments = 64);
+	static std::shared_ptr<Mesh> createArc(float radius, float thickness, float startAngle, float endAngle, int segments = 64);
 };
 
 
@@ -56,10 +58,10 @@ public:
 	Boundary& addGround(float width, float thickness, glm::vec3 position, float friction = 0.0f);
 	Boundary& addWall(float height, float thickness, glm::vec3 position, float friction = 0.0f);
 	Boundary& addSlope(float width, float thickness, glm::vec3 position, float angle, float friction = 0.0f);
-	Boundary& addCircularTrack(float radius, float thickness, glm::vec3 center, float friction = 0.0f, int segs = 64);
+	Boundary& addCircularTrack(float radius, glm::vec3 center,float thickness = 0.1f, float friction = 0.0f, int segs = 64);
 	Boundary& addLine(glm::vec3 startPoint, glm::vec3 endPoint, float thickness, float friction = 0.0f);
+	Boundary& addArc(float radius, float thickness, glm::vec3 position, float startAngle, float endAngle, float friction = 0.0f, int segs = 64);
 	void draw(Renderer& renderer);
-	void checkAndResolve(SceneObject& obj);
 };
 
 

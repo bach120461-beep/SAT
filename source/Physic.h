@@ -77,9 +77,6 @@ public:
 	static CollisionInfo checkAABB(const SceneObject& obj_one, const SceneObject& obj_two);
 	static CollisionInfo checkCircle(const SceneObject& obj_one, const SceneObject& obj_two);
 	static void resolveCollision(SceneObject& obj_one, SceneObject& obj_two, const CollisionInfo& info);
-	static CollisionInfo checkAABB_Boundary(const SceneObject& obj, const BoundarySegment& boundary);
-	static CollisionInfo checkCircularBoundary(const SceneObject& obj, const BoundarySegment& boundary);
-	static void resolveBoundaryCollision(SceneObject& obj, const BoundarySegment& boundary, const CollisionInfo& info);
 private:
 	static void resolvePosition(SceneObject& a, SceneObject& b, const CollisionInfo& info);
 	static void resolveVelocity(SceneObject& a, SceneObject& b, const CollisionInfo& info);

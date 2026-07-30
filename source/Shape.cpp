@@ -29,21 +29,44 @@ std::shared_ptr<Mesh> MeshFactory::createCircle(float radius, int segments)
 	return std::make_shared<Mesh>(vertices, indices);
 }
 
-std::shared_ptr<Mesh> MeshFactory::createCircleOutline(float radius, int segments)
+std::shared_ptr<Mesh> MeshFactory::createCircleOutline(float radius, float thickness, int segments)
 {
 	std::vector<float> vertices;
 	std::vector <unsigned int> indices;
 
-	//Edge vertices
+	float innerRad = radius - thickness * 0.5f;
+	float outerRad = radius + thickness * 0.5f;
+
+	//Inner and outer vertices
 	for (int i = 0; i <= segments; i++)
 	{
+		//These are just math
 		float angle = (float)i / segments * glm::two_pi<float>();
-		vertices.push_back(radius * cos(angle));
-		vertices.push_back(radius * sin(angle));
+		float cos_a = cos(angle);
+		float sin_a = sin(angle);
+
+		//Outer vertex
+		vertices.push_back(outerRad * cos_a);
+		vertices.push_back(outerRad * sin_a);
 		vertices.push_back(0.0f);
 
-		indices.push_back(i);
-		indices.push_back((i + 1) % segments);
+		//Inner vertex
+		vertices.push_back(innerRad * cos_a);
+		vertices.push_back(innerRad * sin_a);
+		vertices.push_back(0.0f);
+	}
+	//Circle segment order
+	for (int i = 0; i < segments; i++)
+	{
+		unsigned int outer1 = i * 2;
+		unsigned int inner1 = i * 2 + 1;
+		unsigned int outer2 = (i + 1) * 2;
+		unsigned int inner2 = (i + 1) * 2 + 1;
+
+		indices.insert(indices.end(), {
+			outer1, inner1, outer2,   // triangle 1
+			inner1, inner2, outer2    // triangle 2
+			});
 	}
 	return std::make_shared<Mesh>(vertices, indices);
 }
@@ -210,10 +233,36 @@ std::shared_ptr<Mesh> MeshFactory::createWall(float height, float thickness)
 	return std::make_shared<Mesh>(vertices, indices);
 }
 
-std::shared_ptr<Mesh> MeshFactory::createCircularTrack(float radius, float thickness, int segments)
+std::shared_ptr <Mesh> MeshFactory::createHalfCircle(float radius, int segments)
 {
 	std::vector<float> vertices;
-	std::vector<unsigned int> indices;
+	std::vector <unsigned int> indices;
+
+	//Centre vertex
+	vertices.insert(vertices.end(), { 0.0f,0.0f,0.0f });
+
+	//Edge vertices
+	for (int i = 0; i <= segments; i++)
+	{
+		float angle = (float)i / segments * glm::pi<float>();
+		vertices.push_back(radius * cos(angle));
+		vertices.push_back(radius * sin(angle));
+		vertices.push_back(0.0f);
+	}
+
+	//Triangle fan indices
+	for (int i = 0; i < segments; i++)
+	{
+		indices.push_back(0);
+		indices.push_back(i + 1);
+		indices.push_back(i + 2);
+	}
+	return std::make_shared<Mesh>(vertices, indices);
+}
+std::shared_ptr <Mesh> MeshFactory::createHalfCircleOutLine(float radius,float thickness, int segments)
+{
+	std::vector<float> vertices;
+	std::vector <unsigned int> indices;
 
 	float innerRad = radius - thickness * 0.5f;
 	float outerRad = radius + thickness * 0.5f;
@@ -222,7 +271,7 @@ std::shared_ptr<Mesh> MeshFactory::createCircularTrack(float radius, float thick
 	for (int i = 0; i <= segments; i++)
 	{
 		//These are just math
-		float angle = (float)i / segments * glm::two_pi<float>();
+		float angle = (float)i / segments * glm::pi<float>();
 		float cos_a = cos(angle);
 		float sin_a = sin(angle);
 
@@ -236,7 +285,6 @@ std::shared_ptr<Mesh> MeshFactory::createCircularTrack(float radius, float thick
 		vertices.push_back(innerRad * sin_a);
 		vertices.push_back(0.0f);
 	}
-
 	//Circle segment order
 	for (int i = 0; i < segments; i++)
 	{
@@ -248,7 +296,43 @@ std::shared_ptr<Mesh> MeshFactory::createCircularTrack(float radius, float thick
 		indices.insert(indices.end(), {
 			outer1, inner1, outer2,   // triangle 1
 			inner1, inner2, outer2    // triangle 2
-	    });
+			});
+	}
+	return std::make_shared<Mesh>(vertices, indices);
+}
+
+std::shared_ptr<Mesh> MeshFactory::createArc(float radius, float thickness, float startAngle, float endAngle, int segments)
+{
+	std::vector<float> vertices;
+	std::vector <unsigned int> indices;
+
+	float innerRad = radius - thickness * 0.5f;
+	float outerRad = radius + thickness * 0.5f;
+
+	for (int i = 0; i <= segments; i++)
+	{
+		float angle = startAngle + (float)i / segments * (endAngle - startAngle);
+		float cos_a = cos(angle);
+		float sin_a = sin(angle);
+
+		vertices.push_back(outerRad * cos_a);
+		vertices.push_back(outerRad * sin_a);
+		vertices.push_back(0.0f);
+
+		vertices.push_back(innerRad * cos_a);
+		vertices.push_back(innerRad * sin_a);
+		vertices.push_back(0.0f);
+	}
+	for (int i = 0; i < segments; i++) {
+		unsigned int outer1 = i * 2;
+		unsigned int inner1 = i * 2 + 1;
+		unsigned int outer2 = (i + 1) * 2;
+		unsigned int inner2 = (i + 1) * 2 + 1;
+
+		indices.insert(indices.end(), {
+			outer1, inner1, outer2,
+			inner1, inner2, outer2
+			});
 	}
 	return std::make_shared<Mesh>(vertices, indices);
 }
@@ -259,9 +343,7 @@ Boundary& Boundary::addGround(float width, float thickness, glm::vec3 position, 
 	auto mesh = MeshFactory::createGround(width, thickness);
 
 	BoundarySegment seg{
-		SceneObject(mesh, position, glm::vec3(0.0f),
-					std::numeric_limits<float>::infinity(),
-					Color::Black),
+		SceneObject(mesh, position, glm::vec3(0.0f),std::numeric_limits<float>::infinity(),Color::Black),
 		BoundaryType::FLAT,
 		friction,
 		0.0f,
@@ -275,9 +357,7 @@ Boundary& Boundary::addWall(float height, float thickness, glm::vec3 position, f
 	auto mesh = MeshFactory::createWall(height, thickness);
 
 	BoundarySegment seg{
-		SceneObject(mesh, position, glm::vec3(0.0f),
-					std::numeric_limits<float>::infinity(),
-					Color::Black),
+		SceneObject(mesh, position, glm::vec3(0.0f),std::numeric_limits<float>::infinity(),Color::Black),
 		BoundaryType::FLAT,
 		friction,
 		0.0f,
@@ -297,9 +377,9 @@ Boundary& Boundary::addSlope(float width, float thickness, glm::vec3 position, f
 	segments.push_back(seg);
 	return *this;
 }
-Boundary& Boundary::addCircularTrack(float radius, float thickness, glm::vec3 center, float friction, int segs)
+Boundary& Boundary::addCircularTrack(float radius, glm::vec3 center, float thickness, float friction, int segs)
 {
-	auto mesh = MeshFactory::createCircularTrack(radius, thickness, segs);
+	auto mesh = MeshFactory::createHalfCircleOutLine(radius, thickness, segs);
 
 	BoundarySegment seg{
 		SceneObject(mesh, center, glm::vec3(0.0f), std::numeric_limits<float>::infinity(),Color::Black),
@@ -325,22 +405,19 @@ Boundary& Boundary::addLine(glm::vec3 startPoint, glm::vec3 endPoint, float thic
 	segments.push_back(seg);
 	return *this;
 }
+
+Boundary& Boundary::addArc(float radius, float thickness, glm::vec3 position, float startAngle, float endAngle, float friction, int segs)
+{
+	auto mesh = MeshFactory::createArc(radius, thickness, startAngle, endAngle, segs);
+	SceneObject obj(mesh, position, glm::vec3(0.0f), std::numeric_limits<float>::infinity(), Color::Black);
+	BoundarySegment seg{ obj, BoundaryType::CIRCULAR, friction, radius, position };
+	segments.push_back(seg);
+	return *this;
+}
+
 void Boundary::draw(Renderer& renderer)
 {
 	for (auto& seg : segments) {
 		renderer.drawMesh(*seg.object.mesh, seg.object.getModelMat(), seg.object.color);
-	}
-}
-void Boundary::checkAndResolve(SceneObject& obj)
-{
-	for (auto& seg : segments) {
-		CollisionInfo info;
-
-		if (seg.type == BoundaryType::FLAT)
-			info = Collision::checkAABB_Boundary(obj, seg);
-		else
-			info = Collision::checkCircularBoundary(obj, seg);
-
-		Collision::resolveBoundaryCollision(obj, seg, info);
 	}
 }
