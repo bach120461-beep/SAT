@@ -1,4 +1,18 @@
+# Visual Studio temporary & configuration files
 .vs/
-.vs/
-*.ipch
-*.db
+*.user
+*.suo
+*.userosv
+*.sln.docstates
+
+# Build outputs (binaries, object files)
+Debug/
+Release/
+x64/
+x86/
+out/
+build/
+*.exe
+*.obj
+*.pdb
+*.ilk
