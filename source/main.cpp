@@ -38,10 +38,22 @@ int main()
     SceneObject square2(carMesh, glm::vec3(300.0f, 0.0f, 0.0f), glm::vec3(100.0f, 0.0f, 0.0f), 1.0f, Color::Blue);
     // Circular motion track
     Boundary linearTrack;
-    linearTrack
-        .addGround(500.0f, 5.0f, glm::vec3(-250.0f, -200.0f, 0.0f))
-        .addArc(20.0f, 5.0f, glm::vec3(0.0f, -170.0f, 0.0f), glm::radians(270.0f),glm::radians(360.0f))               
-        .addCircularTrack(200.0f, glm::vec3(400.0f, -200.0f, 0.0f), 5.0f);
+    // Initialize builder at start position (-500, -200) facing Right (0 degrees)
+    Track builder(linearTrack, glm::vec3(-500.0f, -200.0f, 0.0f), 0.0f);
+
+    builder
+        .addGround(200.0f, 5.0f)         // Ground segment
+        .addArcLeft(40.0f, 60.0f, 5.0f)    
+        .addArcRight(100.0f, 120.0f, 5.0f)   
+        .addArcLeft(40.0f, 60.0f, 5.0f)    
+        .addGround(200.0f, 5.0f)
+        .addArcRight(40.0f, 60.0f, 5.0f)
+        .addArcLeft(100.0f, 120.0f, 5.0f)
+        .addArcRight(40.0f, 60.0f, 5.0f)
+        .addGround(100.0f, 5.0f)
+        .addSlope(100.0f, 30.0f, 5.0f);
+
+
     float lastFrame = glfwGetTime();
     square1.restitution = 0.5f;
     while (!glfwWindowShouldClose(window))

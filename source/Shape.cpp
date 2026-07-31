@@ -261,6 +261,7 @@ std::shared_ptr <Mesh> MeshFactory::createHalfCircle(float radius, int segments)
 }
 std::shared_ptr <Mesh> MeshFactory::createHalfCircleOutLine(float radius,float thickness, int segments)
 {
+	
 	std::vector<float> vertices;
 	std::vector <unsigned int> indices;
 

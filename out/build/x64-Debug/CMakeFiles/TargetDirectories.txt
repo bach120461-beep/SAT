@@ -1,4 +1,0 @@
-C:/Three_d_engine/out/build/x64-Debug/CMakeFiles/glad.dir
-C:/Three_d_engine/out/build/x64-Debug/CMakeFiles/Three_d_engine.dir
-C:/Three_d_engine/out/build/x64-Debug/CMakeFiles/edit_cache.dir
-C:/Three_d_engine/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
