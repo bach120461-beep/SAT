@@ -1,11 +1,8 @@
 #include "Application.h"
 
 
-Application::Application() :
-    m_window(nullptr), 
-    m_camera(SCR_WIDTH, SCR_HEIGHT), 
-    m_shader("Resources/Shader.vert", "Resources/Shader.frag"),
-    m_renderer(m_shader, m_camera)
+Application::Application() : 
+    m_camera(SCR_WIDTH, SCR_HEIGHT), builder(track), m_constraint(builder)
 {}
 void Application::Init()
 {
@@ -14,14 +11,14 @@ void Application::Init()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Motion Simulation", NULL, NULL);
-    if (window == NULL)
+    m_window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Motion Simulation", NULL, NULL);
+    if (m_window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return;
     }
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(m_window);
     //glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -29,6 +26,8 @@ void Application::Init()
         std::cout << "Failed to initialize GLAD" << std::endl;
         return;
     }
+    m_shader = std::make_unique<Shader>("Resources/Shader.vert", "Resources/Shader.frag");
+    m_renderer = std::make_unique<Renderer>(*m_shader, m_camera);
 }
 
 void Application::Run()
@@ -40,25 +39,44 @@ void Application::Run()
         float dt = static_cast<float>(currentFrame - lastFrame);
         if (dt > 0.016f) dt = 0.016f;
         lastFrame = currentFrame;
-        m_renderer.clear(Color::White);
+        ProcessInput(m_window);
         Update(dt);
+        Render();
+
+        glfwSwapBuffers(m_window);
+        glfwPollEvents();
     }
 }
 
 void Application::Update(float dt)
 {
+    // Apply Track Constraints
+    for (auto& object : objectList)
+    {
+        m_constraint.constrain(object, dt, 25.0f);
+    }
+
+    // Update Physics
     for (auto& object : objectList)
     {
         object.physics.update(dt);
+    }
+
+    for (size_t i = 0; i < objectList.size(); ++i) {
+        for (size_t j = i + 1; j < objectList.size(); ++j) {
+            CollisionInfo info = Collision::checkAABB(objectList[i], objectList[j]);
+            Collision::resolveCollision(objectList[i], objectList[j], info);
+        }
     }
 }
 
 void Application::Render()
 {
-    Track.draw(m_renderer);
+    m_renderer->clear(Color::White);
+    track.draw(*m_renderer);
     for (auto& object : objectList)
     {
-        m_renderer.drawMesh(*object.mesh, object.getModelMat(), object.color);
+        m_renderer->drawMesh(*object.mesh, object.getModelMat(), object.color);
     }
 }
 
@@ -77,22 +95,42 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void Application::InclinePlane()
 {
-    Track.segments.clear();
-    Track.addGround(400.0f, 5.0f, glm::vec3(-400.0f, 35.0f, 0.0f))
-        .addWall(100.0f, 5.0f, glm::vec3(-600.0f, 35.0f, 0.0f))
-        .addSlope(220.0f, 5.0f, glm::vec3(0.0f, 0.0f, 0.0f), glm::radians(-10.0f))
-        .addGround(400.0f, 5.0f, glm::vec3(400.0f, -35.0f, 0.0f))
-        .addWall(100.0f, 5.0f, glm::vec3(600.0f, -17.5f, 0.0f));
+    builder.segments.clear();
+    objectList.clear();
+
+    //Adding object
+    auto carMesh = MeshFactory::createCar(80.0f, 50.0f, 10.0f);
+    SceneObject car(carMesh, glm::vec3(-400.0f, 50.0f, 0.0f), glm::vec3(100.0f, 0.0f, 0.0f), 1.0f, Color::Black);
+    objectList.push_back(car);
+
+    builder.addGround(200.0f, 5.0f)
+           .addSlope(100.0f, 30.0f, 5.0f)
+           .addGround(200.0f, 5.0f);
 }
 void Application::CircularMotion()
 {
-    Track.segments.clear();
+    builder.segments.clear();
+    objectList.clear();
 }
 void Application::Collision()
 {
-    Track.segments.clear();
+    builder.segments.clear();
+    objectList.clear();
 }
 void Application::ConstantAcceleration()
 {
-    Track.segments.clear();
+    builder.segments.clear();
+    objectList.clear();
+}
+
+void Application::ProcessInput(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    // Presets switching
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) InclinePlane();
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) CircularMotion();
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) Collision();
+    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS) ConstantAcceleration();
 }

@@ -64,6 +64,10 @@ void SceneObject::turnToVelocity()
 	if (physics.getSpeed() > 0.0f)
 		physics.rotation = atan2(physics.velocity.y, physics.velocity.x);
 }
+void SceneObject::alignToNormal(const glm::vec3& surfaceNormal)
+{
+	physics.rotation = atan2(surfaceNormal.x, surfaceNormal.y);
+}
 
 void SceneObject::calculateSize(const std::vector<float>& vertices)
 {

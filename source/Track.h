@@ -13,6 +13,28 @@
 // In short term, the boundary is the blue print of functions that create shape of the track
 // this Track class is the constructor, the builder of that track
 
+enum class TrackType
+{
+	LINE, ARC
+};
+
+struct TrackSegment //This one is recordin data from each components of the track
+{
+	TrackType type;
+
+	//For line
+	glm::vec3 start;
+	glm::vec3 end;
+
+	//For circular
+	glm::vec3 center;
+	float arcRad;
+	float arcStart;
+	float arcEnd;
+
+	float friction;
+};
+
 class Track
 {
 private:
@@ -22,7 +44,8 @@ private:
 	glm::vec3 trackTip;
 	float dirAngle;
 public:
-	Track(Boundary& boundary, glm::vec3 startPoint, float initialAngle = 0.0f);
+	std::vector<TrackSegment> segments;
+	Track(Boundary& boundary, glm::vec3 startPoint = glm::vec3(0.0f), float initialAngle = 0.0f);
 	//Method chaining will be used just as Boundary
 	Track& addGround(float length, float thickness, float friction = 0.0f);
 	//Both arc functions can be used to draw almost all same curve, the left one go anticlockwise, the right one is clockwise
@@ -31,3 +54,25 @@ public:
 	Track& addSlope(float length, float inclineAngle, float thickness, float friction = 0.0f);
 
 };
+
+struct RayHit
+{
+	bool hit = false;
+	glm::vec3 point = glm::vec3(0.0f);
+	glm::vec3 normal = glm::vec3(0.0f);
+	float distance = FLT_MAX;
+	float rad = 0.0f;
+};
+
+class TrackConstraint
+{
+public:
+	Track& track;
+	bool isActive;
+	float normalForce;
+	float groundAngle;
+
+	RayHit castRay(glm::vec3 origin, glm::vec3 direction, float maxDist);
+	void constrain(SceneObject& obj, float dt, float halfH);
+};
+

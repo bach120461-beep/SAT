@@ -45,6 +45,7 @@ public:
 	);
 	glm::mat4 getModelMat();
 	void turnToVelocity();
+	void alignToNormal(const glm::vec3& surfaceNormal); //adjusting position base on normal 
 	void calculateSize(const std::vector<float>& vertices);
 	float calculateBoundingRadius() const;
 	float restitution = 1.0f;

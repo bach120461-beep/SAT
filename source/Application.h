@@ -10,11 +10,13 @@ class Application
 private:
 	GLFWwindow* m_window;
 	Camera m_camera;
-	Shader m_shader;
-	Renderer m_renderer;
-	bool isRunning = true;
+	std::unique_ptr<Shader> m_shader;
+	std::unique_ptr<Renderer> m_renderer;
 	std::vector<SceneObject> objectList;;
-	Boundary Track;
+	Boundary track;
+	Track builder;
+	TrackConstraint m_constraint;
+	bool isRunning = true;
 public:
 	Application();
 	//~Application();
@@ -29,11 +31,4 @@ private:
 	void CircularMotion();
 	void Collision();
 	void ConstantAcceleration();	
-	//Adding object - these are 2 line methods
-	//void addCar();
-	//void addSquare();
-	//void addRectangle();
-	//void addTriangle();
-	//void addCircle();
-
 };
