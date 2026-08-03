@@ -15,16 +15,15 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/out)
 # GLAD
 # ──────────────────────────────────────────────
 add_library(glad STATIC
-    thirdparty/glad/glad/src/glad.c)
+    thirdparty/glad/glad/src/glad.c
+)
 target_include_directories(glad PUBLIC
     thirdparty/glad/glad/include
 )
 
 # ──────────────────────────────────────────────
-# GLFW  (pre-built / header-only layout)
+# GLFW (pre-built / header-only layout)
 # ──────────────────────────────────────────────
-# Assumes thirdparty/glfw/glfw/lib contains the static lib
-# and thirdparty/glfw/glfw/include contains the headers.
 add_library(glfw STATIC IMPORTED)
 
 if(WIN32)
@@ -42,12 +41,37 @@ set_target_properties(glfw PROPERTIES
         ${CMAKE_SOURCE_DIR}/thirdparty/glfw/glfw/include
 )
 
+# ──────────────────────────────────────────────
+# GLM
+# ──────────────────────────────────────────────
 add_library(glm INTERFACE)
 target_include_directories(glm INTERFACE
     thirdparty/glm
 )
 
+# ──────────────────────────────────────────────
+# Dear ImGui
+# ──────────────────────────────────────────────
+add_library(imgui STATIC
+    thirdparty/imgui/imgui.cpp
+    thirdparty/imgui/imgui_draw.cpp
+    thirdparty/imgui/imgui_widgets.cpp
+    thirdparty/imgui/imgui_tables.cpp
+    thirdparty/imgui/imgui_demo.cpp
+    thirdparty/imgui/backends/imgui_impl_glfw.cpp
+    thirdparty/imgui/backends/imgui_impl_opengl3.cpp
+)
 
+target_include_directories(imgui PUBLIC
+    ${CMAKE_SOURCE_DIR}/thirdparty/imgui
+    ${CMAKE_SOURCE_DIR}/thirdparty/imgui/backends
+    ${CMAKE_SOURCE_DIR}/thirdparty/glfw/glfw/include
+    ${CMAKE_SOURCE_DIR}/thirdparty/glad/glad/include
+)
+
+# ──────────────────────────────────────────────
+# Main Application Executable
+# ──────────────────────────────────────────────
 add_executable(${PROJECT_NAME}
     source/main.cpp
     "Rendering/Mesh.h"
@@ -58,22 +82,33 @@ add_executable(${PROJECT_NAME}
     "Rendering/Camera.cpp"      
     "Rendering/Renderer.h"
     "Rendering/Renderer.cpp"    
-  "source/Physic.h" "source/Physic.cpp" "source/Shape.h" "source/Shape.cpp" "source/Application.h" "source/Application.cpp" "source/Track.h" "source/Track.cpp")
+    "source/Physic.h" 
+    "source/Physic.cpp" 
+    "source/Shape.h" 
+    "source/Shape.cpp" 
+    "source/Application.h" 
+    "source/Application.cpp" 
+    "source/Track.h" 
+    "source/Track.cpp"
+)
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}
     thirdparty/glad/glad/include
     thirdparty/glfw/glfw/include
     thirdparty/glm
+    thirdparty/imgui
+    thirdparty/imgui/backends
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     glad
     glfw
     glm
+    imgui
 )
 
-# Platform-specific system libs needed by GLFW
+# Platform-specific system libs needed by GLFW / OpenGL
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE opengl32)
 elseif(APPLE)
@@ -96,4 +131,18 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_SOURCE_DIR}/Resources"
     "${CMAKE_SOURCE_DIR}/out/Resources"
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+)
+
+# ──────────────────────────────────────────────
+# Post-Build: Copy Resources folder
+# ──────────────────────────────────────────────
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/Resources"
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Resources"
+    COMMENT "Copying assets to build output directory..."
 )
