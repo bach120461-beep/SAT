@@ -71,6 +71,14 @@ Track& Track::addSlope(float length, float inclineAngle, float thickness, float 
 	return addGround(length, thickness, friction);
 }
 
+void Track::reset(glm::vec3 startPoint, float initialAngle)
+{
+    trackTip = startPoint;
+    dirAngle = glm::radians(initialAngle);
+    segments.clear();
+    boundary.segments.clear();
+}
+
 float NormalizeAngle(float angle) {
     while (angle < 0.0f) angle += glm::two_pi<float>();
     while (angle >= glm::two_pi<float>()) angle -= glm::two_pi<float>();

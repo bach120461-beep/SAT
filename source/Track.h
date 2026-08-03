@@ -1,3 +1,4 @@
+#pragma once
 #include "Shape.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
@@ -52,6 +53,7 @@ public:
 	Track& addArcLeft(float radius, float angle, float thickness, float friction = 0.0f, int segs = 32); 
 	Track& addArcRight(float radius, float angle, float thickness, float friction = 0.0f, int segs = 32);
 	Track& addSlope(float length, float inclineAngle, float thickness, float friction = 0.0f);
+	void reset(glm::vec3 startPoint = glm::vec3(-500.0f, -200.0f, 0.0f), float initialAngle = 0.0f);
 
 };
 

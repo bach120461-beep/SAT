@@ -1,9 +1,7 @@
 #pragma once
 #include "included.h"
+#include "Track.h"       
 
-// settings
-const unsigned int SCR_WIDTH = 1980;
-const unsigned int SCR_HEIGHT = 1080;
 
 class Application
 {
@@ -17,12 +15,14 @@ private:
 	Track builder;
 	TrackConstraint m_constraint;
 	bool isRunning = true;
+	const int m_width;
+	const int m_height;
 public:
-	Application();
+	Application(const int SCR_WIDTH, const int SCR_HEIGHT);
 	//~Application();
 	void Run();
-private:
 	void Init();
+private:
 	void ProcessInput(GLFWwindow* window);
 	void Update(float dt);
 	void Render();
